@@ -1,0 +1,22 @@
+{
+  "name": "mipedidobackend",
+  "version": "1.0.0",
+  "description": "Back end para sistema de pedidos en linea a la mesa",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon ."
+  },
+  "author": "Eric Aguilar Marcial",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^3.0.0",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^10.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.13.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
