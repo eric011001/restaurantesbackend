@@ -73,10 +73,10 @@ const typeDefs = gql`
     type Query {
         #Usuarios
         obtenerUsuarios: [Usuario]
-
+        obtenerUsuario(id: ID!): Usuario
         #Categorias
         obtenerCategorias: [Categoria]
-
+        obtenerCategoria(id: ID): Categoria
         obtenerGenerales: [General]
         
     }

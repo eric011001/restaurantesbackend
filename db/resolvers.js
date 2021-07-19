@@ -26,6 +26,32 @@ const resolvers = {
                 
                 const categorias = await Categoria.find({});
                 return categorias;
+            },
+            obtenerCategoria: async (_,{id},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const categoria = await Categoria.findById(id);
+                if(!categoria){
+                    throw new Error("La categoria no existe");
+                }
+
+                return categoria;
+            },
+            obtenerUsuarios: async () => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+
+                const usuarios = await Usuario.find({});
+                return usuarios;
+            },
+            obtenerUsuario: async (_,{id},ctx) => {
+                const usuario = await Usuario.findById(id);
+                if(!usuario){
+                    throw new Error("El usuario no existe");
+                }
+                return(usuario);
             }
         },
         Mutation: {
