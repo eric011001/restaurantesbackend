@@ -5,6 +5,7 @@ const Categoria = require('../models/Categoria');
 const {mongoose} = require('mongoose');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Platillo = require('../models/Platillo');
 require('dotenv').config({ path: 'variables.env'});
 
 const crearTokenUsuario = (usuario, secreta, expiresIn) => {
@@ -52,6 +53,17 @@ const resolvers = {
                     throw new Error("El usuario no existe");
                 }
                 return(usuario);
+            },
+            obtenerPlatillos: async (_,{},ctx) => {
+                const platillos = await Platillo.find({}).populate('categoria');
+                return platillos;
+            },
+            obtenerPlatillo: async (_,{id},ctx) => {
+                const existePlatillo = await Platillo.findById(id);
+                if(!existePlatillo){
+                    throw new Error("El platillo no existe");
+                }
+                return existePlatillo;
             }
         },
         Mutation: {
@@ -93,6 +105,37 @@ const resolvers = {
                     token: crearTokenUsuario(usuarioExiste,process.env.SECRETA,'28D')
                 }
             },
+            actualizarUsuario: async(_, {id,input},ctx) => {
+                const {lastPassword} = input;
+                const usuario = await Usuario.findById(id);
+                if(!usuario){
+                    throw new Error("El usuario no existe");
+                }
+                const passwordCorrecto = await bcryptjs.compare(lastPassword,usuarioExiste.password);
+                if(!passwordCorrecto){
+                    throw new Error('La confirmación de la contraseña no es correcta');
+                }
+                delete input.lastPassword;
+                const newUsuario = await Usuario.findOneAndUpdate({_id: id},input, { new: true});
+                return newUsuario;
+
+            },
+            eliminarUsuario: async (_,{id},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existeUsuario = Usuario.findById(id);
+                if(!existeUsuario){
+                    throw new Error("El usuario no existe");
+                }
+                try { 
+                    await Usuario.findByIdAndDelete(id);
+                    return "Usuario eliminado"
+                } catch (error) {
+                    throw new Error(error);
+                }
+                
+            },
             crearNuevaCategoria: async (_,{input},ctx) => {
                 if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
                     throw new Error('No cuentas con los permisos para esta acción');
@@ -105,6 +148,70 @@ const resolvers = {
                     throw new Error(error);
                 }
                 console.log(ctx);
+            },
+            actualizarCategoria: async (_,{id,input}, ctx) => {
+                const existeCategoria = Categoria.findById(id);
+                if(!existeCategoria){
+                    throw new Error("La categoria no existe");
+                }
+                const respuesta = Categoria.findOneAndUpdate({_id: id}, input, {new: true});
+                return respuesta;
+            },
+            eliminarCategoria: async (_,{id},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existeCategoria = Categoria.findById(id);
+                if(!existeCategoria){
+                    throw new Error("La categoria no existe");
+                }
+                try {
+                    await Categoria.findByIdAndRemove(id);
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            crearPlatillo: async (_, {input}, ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                try {
+                    const platillo = new Platillo(input);
+                    platillo.save()
+                    return platillo;
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            actualizarPlatillo: async(_,{id,input},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existePlatillo = Platillo.findById(id);
+                if(!existePlatillo){
+                    throw new Error("El platillo no existe");
+                }
+
+                try {
+                    const respuesta = await Platillo.findByIdAndUpdate({_id: id},input,{new: true});
+                    return respuesta;
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            eliminarPlatilo: async(_,{id},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existePlatillo = Platillo.findById(id);
+                if(!existePlatillo){
+                    throw new Error("El platillo no existe");
+                }
+                try {
+                    await Platillo.findByIdAndDelete(id);
+                } catch (error) {
+                    throw new Error(error);
+                }
             },
             EscribirGenerales: async (_,{input}, ctx) => {
                 try {
