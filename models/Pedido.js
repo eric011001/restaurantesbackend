@@ -12,6 +12,16 @@ const PedidoSchema = mongoose.Schema({
         type: String,
         require: true,
         trim: true
+    },
+    comentario: {
+        type: String,
+        trim: true
+        
+    },
+    mesa: {
+        type: String,
+        require: true,
+        trim: true
     }
 })
 

@@ -209,6 +209,51 @@ const resolvers = {
                 }
                 try {
                     await Platillo.findByIdAndDelete(id);
+                    return "Platillo eliminado"
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            crearMesa: async(_,{input},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                try {
+                    const mesa = new Mesa(input);
+                    mesa.save();
+                    return(mesa);
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            actualizarMesa: async(_,{id,input},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existeMesa = Mesa.findById(id);
+                if(!existeMesa){
+                    throw new Error("La mesa no existe");
+                }
+
+                try {
+                    const respuesta = Mesa.findByIdAndUpdate({_id: id}, input, {new: true});
+                    return respuesta;
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            eliminarMesa: async(_,{id},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existeMesa = Mesa.findById(id);
+                if(!existeMesa){
+                    throw new Error("La mesa no existe");
+                }
+
+                try {
+                    await Mesa.findByIdAndDelete(id);
+                    return "Mesa eliminada";
                 } catch (error) {
                     throw new Error(error);
                 }
