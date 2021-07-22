@@ -12,6 +12,12 @@ const typeDefs = gql`
         INACTIVO
     }
 
+    enum EstadoPlatillo {
+        PENDIENTE
+        EN PREPARACION
+        COMPLETADO
+    }
+
     type Token {
         token: String
     }
@@ -54,6 +60,20 @@ const typeDefs = gql`
     type Mesa{
         id: ID
         nombre: String
+    }
+
+    type Pedido {
+        pedido: [PedidoPlatillo]
+        total: Float
+        estado: EstadoPlatillo
+        comentario: String
+        mesa: String
+    }
+
+    type PedidoPlatillo {
+        nombre: String
+        cantidad: Int 
+        precio: Float
     }
 
     input GeneralInput{
@@ -106,6 +126,20 @@ const typeDefs = gql`
         nombre: String!
     }
 
+    input PedidoInput {
+        pedido: [PedidoPlatilloInput!]
+        total: Float!
+        estado: EstadoPlatillo!
+        comentario: String
+        mesa: String!
+    }
+
+    input PedidoPlatilloInput {
+        nombre: String!
+        cantidad: Int!
+        precio: Float!
+    }
+
     type Query {
         #Usuarios
         obtenerUsuarios: [Usuario]
@@ -134,6 +168,14 @@ const typeDefs = gql`
         actualizarPlatillo(id: ID!, input: PlatilloInput): Platillo
         eliminarPlatillo(id:ID!):String
         #mesa
+        crearMesa(input: MesaInput): Mesa
+        actualizarMesa(id: ID!,input: MesaInput!): Mesa
+        eliminarMesa(id:ID!): String
+        #pedido
+        crearPedido(input: PedidoInput): Pedido
+        actualizarPedido(id: ID!, input: PedidoInput): Pedido
+        eliminarPedido(id: ID!): String
+
         EscribirGenerales(input: GeneralInput!): General
     }
 `;

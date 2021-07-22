@@ -6,6 +6,7 @@ const {mongoose} = require('mongoose');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Platillo = require('../models/Platillo');
+const Pedido = require('../models/Pedido');
 require('dotenv').config({ path: 'variables.env'});
 
 const crearTokenUsuario = (usuario, secreta, expiresIn) => {
@@ -199,7 +200,7 @@ const resolvers = {
                     throw new Error(error);
                 }
             },
-            eliminarPlatilo: async(_,{id},ctx) => {
+            eliminarPlatillo: async(_,{id},ctx) => {
                 if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
                     throw new Error('No cuentas con los permisos para esta acción');
                 }
@@ -236,7 +237,7 @@ const resolvers = {
                 }
 
                 try {
-                    const respuesta = Mesa.findByIdAndUpdate({_id: id}, input, {new: true});
+                    const respuesta =  await Mesa.findByIdAndUpdate({_id: id}, input, {new: true});
                     return respuesta;
                 } catch (error) {
                     throw new Error(error);
@@ -246,7 +247,7 @@ const resolvers = {
                 if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
                     throw new Error('No cuentas con los permisos para esta acción');
                 }
-                const existeMesa = Mesa.findById(id);
+                const existeMesa = await Mesa.findById(id);
                 if(!existeMesa){
                     throw new Error("La mesa no existe");
                 }
@@ -254,6 +255,49 @@ const resolvers = {
                 try {
                     await Mesa.findByIdAndDelete(id);
                     return "Mesa eliminada";
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            crearPedido: async(_,{input}, ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                try {
+                    const pedido = new Pedido(input);
+                    pedido.save();
+
+                    return pedido;
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            actualizarPedido: async (_,{id,input}, ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existePedido = await Pedido.findById(id);
+                if(!existePedido){
+                    throw new Error("El pedido no existe");
+                }
+                try {
+                    const respuesta = await Pedido.findByIdAndUpdate({_id: id}, input, {new: true});
+                    return respuesta;
+                } catch (error) {
+                    throw new Error(error);
+                }
+            },
+            eliminarPedido: async (_,{id},ctx) => {
+                if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
+                    throw new Error('No cuentas con los permisos para esta acción');
+                }
+                const existePedido = await Pedido.findById(id);
+                if(!existePedido){
+                    throw new Error("El pedido no existe");
+                }
+                try {
+                    await Pedido.findByIdAndDelete(id);
+                    return "Pedido eliminado";
                 } catch (error) {
                     throw new Error(error);
                 }
