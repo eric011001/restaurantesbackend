@@ -55,6 +55,9 @@ const resolvers = {
                 }
                 return(usuario);
             },
+            obtenerMiUsuario: async (_,{},ctx) => {
+                return ctx;
+            },
             obtenerPlatillos: async (_,{},ctx) => {
                 const platillos = await Platillo.find({}).populate('categoria');
                 return platillos;

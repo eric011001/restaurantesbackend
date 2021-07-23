@@ -144,6 +144,7 @@ const typeDefs = gql`
         #Usuarios
         obtenerUsuarios: [Usuario]
         obtenerUsuario(id: ID!): Usuario
+        obtenerMiUsuario: Usuario
         #Categorias
         obtenerCategorias: [Categoria]
         obtenerCategoria(id: ID): Categoria
