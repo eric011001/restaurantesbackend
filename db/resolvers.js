@@ -1,7 +1,7 @@
 const Generales = require('../models/Generales');
 const Usuario = require('../models/Usuario');
 const Categoria = require('../models/Categoria');
-
+const Mesa = require('../models/Mesa');
 const {mongoose} = require('mongoose');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -26,7 +26,7 @@ const resolvers = {
                     throw new Error('No cuentas con los permisos para esta acción');
                 }
                 
-                const categorias = await Categoria.find({});
+                const categorias = await Categoria.find({}).sort({orden: 1});
                 return categorias;
             },
             obtenerCategoria: async (_,{id},ctx) => {
@@ -57,6 +57,10 @@ const resolvers = {
             },
             obtenerMiUsuario: async (_,{},ctx) => {
                 return ctx;
+            },
+            obtenerMesas: async (_,{},ctx) => {
+                const mesas = await Mesa.find({});
+                return mesas;
             },
             obtenerPlatillos: async (_,{},ctx) => {
                 const platillos = await Platillo.find({}).populate('categoria');

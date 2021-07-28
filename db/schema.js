@@ -22,6 +22,11 @@ const typeDefs = gql`
         token: String
     }
 
+    type ExtraPlatillo {
+        nombre: String
+        precio: Float
+    }
+
     type General{
         id: ID
         nombre: String
@@ -55,6 +60,7 @@ const typeDefs = gql`
         disponible: Boolean
         descripcion: String
         categoria: Categoria
+        extras: [ExtraPlatillo]
     }
 
     type Mesa{
@@ -114,12 +120,18 @@ const typeDefs = gql`
         orden: Int!
     }
 
+    input ExtraPlatilloInput {
+        nombre: String!
+        precio: Float!
+    }
+
     input PlatilloInput {
         nombre: String!
         precio: Float!
         disponible: Boolean!
         descripcion: String!
         categoria: ID!
+        extras: [ExtraPlatilloInput]
     }
 
     input MesaInput {
@@ -145,6 +157,8 @@ const typeDefs = gql`
         obtenerUsuarios: [Usuario]
         obtenerUsuario(id: ID!): Usuario
         obtenerMiUsuario: Usuario
+        #mesas
+        obtenerMesas: [Mesa]
         #Categorias
         obtenerCategorias: [Categoria]
         obtenerCategoria(id: ID): Categoria

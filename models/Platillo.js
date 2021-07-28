@@ -21,6 +21,9 @@ const PlatilloSchema = mongoose.Schema({
     categoria: {
         type: mongoose.Schema.Types.ObjectId,
         ref: ('Categoria')
+    },
+    extras:{
+        type: Array
     }
 });
 

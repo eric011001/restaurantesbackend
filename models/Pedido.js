@@ -22,6 +22,10 @@ const PedidoSchema = mongoose.Schema({
         type: String,
         require: true,
         trim: true
+    },
+    fecha:{
+        type: Date,
+        default: Date.now()
     }
 })
 
