@@ -70,6 +70,7 @@ const typeDefs = gql`
     }
 
     type Pedido {
+        id: ID
         pedido: [PedidoPlatillo]
         total: Float
         estado: EstadoPlatillo
