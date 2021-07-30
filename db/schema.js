@@ -117,7 +117,7 @@ const typeDefs = gql`
 
     input CategoriaInput {
         nombre: String!
-        orden: Int!
+        orden: Int
     }
 
     input ExtraPlatilloInput {
