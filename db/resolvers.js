@@ -72,6 +72,17 @@ const resolvers = {
                     throw new Error("El platillo no existe");
                 }
                 return existePlatillo;
+            },
+            obtenerPedidos: async (_,{},ctx) => {
+                const pedidos = await Pedido.find({});
+                return pedidos;
+            },
+            obtenerPedido: async (_,{},ctx) => {
+                const existePedido = await Pedido.findById(id);
+                if(!existePedido){
+                    throw new Error("El platillo no existe");
+                }
+                return existePedido;
             }
         },
         Mutation: {

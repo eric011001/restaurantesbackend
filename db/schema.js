@@ -15,6 +15,7 @@ const typeDefs = gql`
     enum EstadoPlatillo {
         PENDIENTE
         EN PREPARACION
+        ENVIADO
         COMPLETADO
     }
 
@@ -166,6 +167,9 @@ const typeDefs = gql`
         #platillos
         obtenerPlatillos: [Platillo]
         obtenerPlatillo(id: ID!): Platillo
+        #pedidos
+        obtenerPedidos: [Pedido]
+        obtenerPedido(id: ID!): Pedido
         
     }
     type Mutation {
