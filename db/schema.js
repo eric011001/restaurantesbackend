@@ -14,7 +14,7 @@ const typeDefs = gql`
 
     enum EstadoPlatillo {
         PENDIENTE
-        EN PREPARACION
+        ENPREPARACION
         ENVIADO
         COMPLETADO
     }
