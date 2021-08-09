@@ -106,10 +106,14 @@ const typeDefs = gql`
         nombre: String!
         apellidos: String!
         email: String!
-        password: String!
-        lastPassword: String!
         rol: Rol!
         status: Status!
+    }
+
+    input cambioClaveInput {
+        lastPassword: String!
+        newPassword: String!
+        confirmNewPassword: String!
     }
 
     input AuthInput {
@@ -178,6 +182,7 @@ const typeDefs = gql`
         crearNuevoUsuario(input: UsuarioInput!): Usuario
         autenticarUsuario(input: AuthInput!): Token
         actualizarUsuario(id: ID!, input: ActualizarUsuarioInput): Usuario
+        cambiarClaveUsuario(id: ID!, input: cambioClaveInput): Usuario
         eliminarUsuario(id: ID!): String
         #categorias
         crearNuevaCategoria(input: CategoriaInput!): Categoria

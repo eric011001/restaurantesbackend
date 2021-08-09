@@ -67,7 +67,7 @@ const resolvers = {
                 return platillos;
             },
             obtenerPlatillo: async (_,{id},ctx) => {
-                const existePlatillo = await Platillo.findById(id);
+                const existePlatillo = await Platillo.findById(id).populate('categoria');
                 if(!existePlatillo){
                     throw new Error("El platillo no existe");
                 }
@@ -130,14 +130,28 @@ const resolvers = {
                 if(!usuario){
                     throw new Error("El usuario no existe");
                 }
-                const passwordCorrecto = await bcryptjs.compare(lastPassword,usuarioExiste.password);
-                if(!passwordCorrecto){
-                    throw new Error('La confirmación de la contraseña no es correcta');
-                }
-                delete input.lastPassword;
                 const newUsuario = await Usuario.findOneAndUpdate({_id: id},input, { new: true});
                 return newUsuario;
 
+            },
+            cambiarClaveUsuario: async (_,{id,input}, ctx) => {
+                const {lastPassword,newPassword,confirmNewPassword} = input;
+                const usuario = await Usuario.findById(id);
+                if(newPassword !== confirmNewPassword){
+                    throw new Error("Las claves no coinciden")
+                }
+                if(!usuario){
+                    throw new Error("El usuario no existe");
+                }
+                const passwordCorrecto = await bcryptjs.compare(lastPassword,usuario.password);
+                if(!passwordCorrecto){
+                    throw new Error('La confirmación de la contraseña no es correcta');
+                }
+                const salt = await bcryptjs.genSalt(10);
+                const password = await bcryptjs.hash(newPassword, salt);
+
+                const newUsuario = await Usuario.findOneAndUpdate({_id: id}, {password: password},{new: true});
+                return newUsuario;
             },
             eliminarUsuario: async (_,{id},ctx) => {
                 if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
