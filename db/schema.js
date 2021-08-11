@@ -76,12 +76,15 @@ const typeDefs = gql`
         estado: EstadoPlatillo
         comentario: String
         mesa: String
+        fecha: String
+        fechaFinal: String
     }
 
     type PedidoPlatillo {
         nombre: String
         cantidad: Int 
         precio: Float
+        extras: [String]
     }
 
     input GeneralInput{
@@ -156,6 +159,7 @@ const typeDefs = gql`
         nombre: String!
         cantidad: Int!
         precio: Float!
+        extras: [String]
     }
 
     type Query {
@@ -172,6 +176,7 @@ const typeDefs = gql`
         obtenerGenerales: [General]
         #platillos
         obtenerPlatillos: [Platillo]
+        obtenerPlatillosDisponibles: [Platillo]
         obtenerPlatillo(id: ID!): Platillo
         #pedidos
         obtenerPedidos: [Pedido]

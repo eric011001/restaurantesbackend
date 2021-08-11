@@ -26,6 +26,9 @@ const PedidoSchema = mongoose.Schema({
     fecha:{
         type: Date,
         default: Date.now()
+    },
+    fechaFinal:{
+        type: Date
     }
 })
 

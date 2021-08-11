@@ -73,6 +73,10 @@ const resolvers = {
                 const platillos = await Platillo.find({}).populate('categoria');
                 return platillos;
             },
+            obtenerPlatillosDisponibles: async (_,{},ctx) => {
+                const platillos = await Platillo.find({disponible: true}).populate('categoria');
+                return platillos;
+            },
             obtenerPlatillo: async (_,{id},ctx) => {
                 const existePlatillo = await Platillo.findById(id).populate('categoria');
                 if(!existePlatillo){
