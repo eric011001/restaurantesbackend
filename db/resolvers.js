@@ -62,6 +62,13 @@ const resolvers = {
                 const mesas = await Mesa.find({});
                 return mesas;
             },
+            obtenerMesa: async (_,{id},ctx) => {
+                const mesa = await Mesa.findById(id);
+                if(!mesa){
+                    throw new Error('la mesa no existe');
+                }
+                return mesa;
+            },
             obtenerPlatillos: async (_,{},ctx) => {
                 const platillos = await Platillo.find({}).populate('categoria');
                 return platillos;

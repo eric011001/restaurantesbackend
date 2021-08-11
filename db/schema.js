@@ -165,6 +165,7 @@ const typeDefs = gql`
         obtenerMiUsuario: Usuario
         #mesas
         obtenerMesas: [Mesa]
+        obtenerMesa(id: ID): Mesa
         #Categorias
         obtenerCategorias: [Categoria]
         obtenerCategoria(id: ID): Categoria
