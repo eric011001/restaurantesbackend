@@ -2,11 +2,12 @@ const Generales = require('../models/Generales');
 const Usuario = require('../models/Usuario');
 const Categoria = require('../models/Categoria');
 const Mesa = require('../models/Mesa');
-const {mongoose} = require('mongoose');
+const {mongoose, now} = require('mongoose');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Platillo = require('../models/Platillo');
 const Pedido = require('../models/Pedido');
+const { off } = require('commander');
 require('dotenv').config({ path: 'variables.env'});
 
 const crearTokenUsuario = (usuario, secreta, expiresIn) => {
@@ -70,12 +71,133 @@ const resolvers = {
                 return mesa;
             },
             obtenerPlatillos: async (_,{},ctx) => {
-                const platillos = await Platillo.find({}).populate('categoria');
-                return platillos;
+                try {
+
+                    //const platillos = await Platillo.find({}).populate({path: "categoria",options: {sort: [['categoria.orden','asc']]}});
+                    
+                    const platillos = await Platillo.aggregate([
+                        {$match: {}},
+                        {
+                            $lookup: {
+                              from: 'categorias',
+                              localField: 'categoria',
+                              foreignField:'_id',
+                              as: 'categoria'
+                            }
+                        },
+                        {
+                            $unwind: '$categoria' // this to convert the array of one object to be an object
+                        },
+                        {
+                            $project: {
+                              _id: 1,
+                              descripcion: 1,
+                              extras: {
+                                  precio: 1,
+                                  nombre: 1
+                              },
+                              disponible: 1,
+                              nombre: 1,
+                              precio: 1,
+                              // project the values from damages in the spells array in a new array called damages
+                              orden: '$categoria.orden',
+                              categoria: {
+                                _id: 1,
+                                nombre: 1,
+                                orden: 1
+                              }
+                            }
+                        },
+                        {
+                            $project: {
+                              _id: 0,
+                              id: '$_id',
+                              descripcion: 1,
+                              extras: 1,
+                              nombre: 1,
+                              precio: 1,
+                              categoria: {
+                                id: '$categoria._id',
+                                nombre: 1,
+                                orden: 1
+                              },
+                              disponible: 1,
+                              maxDamage: {$max: '$orden'}
+                            }
+                        },
+                        {
+                            $sort: {maxDamage: 1}
+                        }
+                    ])
+                    return platillos;
+                } catch (error) {
+                    console.log(error);
+                }
+                
             },
             obtenerPlatillosDisponibles: async (_,{},ctx) => {
-                const platillos = await Platillo.find({disponible: true}).populate('categoria');
-                return platillos;
+                try {
+
+                    //const platillos = await Platillo.find({}).populate({path: "categoria",options: {sort: [['categoria.orden','asc']]}});
+                    
+                    const platillos = await Platillo.aggregate([
+                        {$match: {disponible: true}},
+                        {
+                            $lookup: {
+                              from: 'categorias',
+                              localField: 'categoria',
+                              foreignField:'_id',
+                              as: 'categoria'
+                            }
+                        },
+                        {
+                            $unwind: '$categoria' // this to convert the array of one object to be an object
+                        },
+                        {
+                            $project: {
+                              _id: 1,
+                              descripcion: 1,
+                              extras: {
+                                  precio: 1,
+                                  nombre: 1
+                              },
+                              disponible: 1,
+                              nombre: 1,
+                              precio: 1,
+                              // project the values from damages in the spells array in a new array called damages
+                              orden: '$categoria.orden',
+                              categoria: {
+                                _id: 1,
+                                nombre: 1,
+                                orden: 1
+                              }
+                            }
+                        },
+                        {
+                            $project: {
+                              _id: 0,
+                              id: '$_id',
+                              descripcion: 1,
+                              extras: 1,
+                              nombre: 1,
+                              precio: 1,
+                              categoria:{
+                                id: '$categoria._id',
+                                nombre: 1,
+                                orden: 1
+                              },
+                              disponible: 1,
+                              maxDamage: {$max: '$orden'}
+                            }
+                        },
+                        {
+                            $sort: {maxDamage: 1}
+                        }
+                    ])
+                    return platillos;
+                } catch (error) {
+                    console.log(error);
+                }
             },
             obtenerPlatillo: async (_,{id},ctx) => {
                 const existePlatillo = await Platillo.findById(id).populate('categoria');
@@ -88,12 +210,55 @@ const resolvers = {
                 const pedidos = await Pedido.find({});
                 return pedidos;
             },
-            obtenerPedido: async (_,{},ctx) => {
+            obtenerPedidosActivos: async (_,{},ctx) => {
+                const pedidos = await Pedido.find({estado : {$ne : "COMPLETADO"}});
+                return pedidos;
+            },
+            obtenerPedido: async (_,{id},ctx) => {
                 const existePedido = await Pedido.findById(id);
                 if(!existePedido){
                     throw new Error("El platillo no existe");
                 }
                 return existePedido;
+            },
+            obtenerIngresosyPedidos: async(_,{},ctx) => {
+                const offset = 21600000;
+                const now = new Date(Date.now()-offset);
+                let today = new Date(Date.now());
+                let week = new Date(Date.now()-518400000);
+                let morning =new Date(`${now.getFullYear()}-${now.getMonth()+1<10 ? ("0") :""}${now.getMonth()+1}-${now.getDate()<10 ? ("0") : ""}${now.getDate()}:00:00.000Z`);
+                
+      
+
+                const datos = await Pedido.aggregate([
+                    {$match: {estado: "COMPLETADO",fecha: {$gte: week, $lte: today}} },
+                    {
+                        $project: {
+                            "y":{"$year":"$fecha"},
+                            "m":{"$month":"$fecha"},
+                            "d":{"$dayOfMonth":"$fecha"},
+                            "h":{"$hour":"$fecha"},
+                            "total":1
+
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: { "year":"$y","month":"$m","day":"$d","hour":"$h"},
+                            //_id: "$h",
+                            ingresos: {$sum: "$total"},
+                            noPedidos:{$sum:1}
+
+                        }
+                    }
+                ]);
+                let final = [];
+                datos.forEach(dato => {
+                    final.push({fecha: dato._id, ingresos: dato.ingresos, noPedidos: dato.noPedidos});
+                })
+                console.log(final);
+                return final;
+
             }
         },
         Mutation: {
@@ -324,6 +489,11 @@ const resolvers = {
                     throw new Error("El pedido no existe");
                 }
                 try {
+                    if(input.estado === "COMPLETADO"){
+                        input.fechaFinal = Date.now();
+                        console.log(input);
+                        console.log(id);
+                    }
                     const respuesta = await Pedido.findByIdAndUpdate({_id: id}, input, {new: true});
                     return respuesta;
                 } catch (error) {

@@ -47,6 +47,19 @@ const typeDefs = gql`
         status: Status
     }
 
+    type Fecha {
+        year: Int
+        month: Int 
+        day: Int
+        hour: Int
+    }
+
+    type IngresosyPedidos {
+        fecha: Fecha
+        ingresos: Float
+        noPedidos: Int
+    }
+
     type Categoria {
         id: ID
         nombre: String
@@ -180,8 +193,11 @@ const typeDefs = gql`
         obtenerPlatillo(id: ID!): Platillo
         #pedidos
         obtenerPedidos: [Pedido]
+        obtenerPedidosActivos: [Pedido]
         obtenerPedido(id: ID!): Pedido
         
+        #estadisticas
+        obtenerIngresosyPedidos: [IngresosyPedidos]
     }
     type Mutation {
         #Usuarios
