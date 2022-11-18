@@ -30,6 +30,10 @@ const UsuarioSchema = mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    restaurante:{
+        type: String,
+        trim: true
     }
 })
 

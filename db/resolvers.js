@@ -2,22 +2,39 @@ const Generales = require('../models/Generales');
 const Usuario = require('../models/Usuario');
 const Categoria = require('../models/Categoria');
 const Mesa = require('../models/Mesa');
-const {mongoose, now} = require('mongoose');
+const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Platillo = require('../models/Platillo');
 const Pedido = require('../models/Pedido');
 const { off } = require('commander');
+const Restaurante = require('../models/Restaurante');
 require('dotenv').config({ path: 'variables.env'});
 
 const crearTokenUsuario = (usuario, secreta, expiresIn) => {
-    const {id, nombre, apellidos, email, status, rol} = usuario;
-    return jwt.sign({id,nombre,apellidos,email,status,rol},secreta, { expiresIn } );
+    const {id, nombre, apellidos, email, status, rol,restaurante} = usuario;
+    return jwt.sign({id,nombre,apellidos,email,status,rol,restaurante},secreta, { expiresIn } );
 
 }
 
 const resolvers = {
         Query: {
+            obtenerRestaurantes: async (_, {input},ctx) => {
+                const {latitud1,longitud1,latitud2,longitud2} = input;
+
+                const restaurantes = await Restaurante.find({
+                    "latitud": {$lte: (latitud1>latitud2 ? latitud1 : latitud2),$gte: (latitud1>latitud2 ? latitud2 : latitud1)},
+                    "longitud" : {$lte : (longitud1>longitud2 ? longitud1 : longitud2), $gte : (longitud1>longitud2 ? longitud2 : longitud1)}
+                });
+                return restaurantes;
+            },
+            obtenerRestaurante: async (_,{id},ctx) => {
+                const restaurante = await Restaurante.findById(id);
+                if(!restaurante) {
+                    throw new Error("El restaurante no existe");
+                }
+                return restaurante;
+            },
             obtenerGenerales: async () => {
                 const generales = await Generales.find({});
                 return generales;
@@ -134,6 +151,72 @@ const resolvers = {
                     console.log(error);
                 }
                 
+            },
+            obtenerPlatillosDisponiblesCategoria: async (_,{categoria},ctx) => {
+                try {
+                    const platillos = await Platillo.find({categoria: `${categoria}`, disponible: true}).populate('categoria');
+                    console.log(platillos);
+                    
+                    //const platillos = await Platillo.find({}).populate({path: "categoria",options: {sort: [['categoria.orden','asc']]}});
+                    
+                    /*const platillos = await Platillo.aggregate([
+                        {$match: {disponible: true, categoria: '6374e55858c90bad838116fe'}},
+                        {
+                            $lookup: {
+                              from: 'categorias',
+                              localField: 'categoria',
+                              foreignField:'_id',
+                              as: 'categoria'
+                            }
+                        },
+                        {
+                            $unwind: '$categoria' 
+                        },
+                        {
+                            $project: {
+                              _id: 1,
+                              descripcion: 1,
+                              extras: {
+                                  precio: 1,
+                                  nombre: 1
+                              },
+                              disponible: 1,
+                              nombre: 1,
+                              precio: 1,
+                              
+                              orden: '$categoria.orden',
+                              categoria: {
+                                _id: 1,
+                                nombre: 1,
+                                orden: 1
+                              }
+                            }
+                        },
+                        {
+                            $project: {
+                              _id: 0,
+                              id: '$_id',
+                              descripcion: 1,
+                              extras: 1,
+                              nombre: 1,
+                              precio: 1,
+                              categoria:{
+                                id: '$categoria._id',
+                                nombre: 1,
+                                orden: 1
+                              },
+                              disponible: 1,
+                              maxDamage: {$max: '$orden'}
+                            }
+                        },
+                        {
+                            $sort: {maxDamage: 1}
+                        }
+                    ])*/
+                    return platillos;
+                } catch (error) {
+                    console.log(error);
+                }
             },
             obtenerPlatillosDisponibles: async (_,{},ctx) => {
                 try {
@@ -262,9 +345,24 @@ const resolvers = {
             }
         },
         Mutation: {
+            crearNuevoRestaurante: async(_,{input},ctx) => {
+                const {rol} = ctx;
+                if(rol !== "SUPERADMINISTRADOR"){
+                    throw new Error("No cuentas con las credenciales para realizar esta acción");
+                }
+                const restaurante = new Restaurante(input);
+                
+                restaurante.save();
+                return restaurante;
+            },
             crearNuevoUsuario: async (_,{input}, ctx) => {
-                const {email, password} = input;
+                const {email, password,rol,restaurante} = input;
                 try {
+                    if(rol === "ADMINISTRADOR" || rol === "USUARIO"){
+                        if(!restaurante || restaurante === ""){
+                            throw new Error("Se requiere de un restaurante");
+                        }
+                    }
                     const usuarioExiste = await Usuario.findOne({email});
 
                     if(usuarioExiste){

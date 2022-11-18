@@ -5,6 +5,7 @@ const typeDefs = gql`
     enum Rol {
         USUARIO
         ADMINISTRADOR
+        SUPERADMINISTRADOR
     }
 
     enum Status {
@@ -45,6 +46,7 @@ const typeDefs = gql`
         email: String
         rol: Rol
         status: Status
+        restaurante: ID
     }
 
     type Fecha {
@@ -116,6 +118,7 @@ const typeDefs = gql`
         password: String!
         rol: Rol!
         status: Status!
+        restaurante: ID
     }
 
     input ActualizarUsuarioInput {
@@ -175,6 +178,67 @@ const typeDefs = gql`
         extras: [String]
     }
 
+    type CategoriaRestaurante {
+        nombre: String
+        id: ID
+    }
+
+    type Horario {
+        dia: String
+        apertura: String
+        cierre: String
+    }
+
+    type Restaurante {
+        id: ID
+        nombre: String
+        direccion: String
+        Ciudad: String
+        Estado: String
+        latitud: Float
+        longitud: Float
+        telefono: String
+        horario: [Horario]
+        correoResponsable: String
+        categoria: CategoriaRestaurante
+        subcategorias: [Categoria]
+        facebook: String
+        instagram: String
+    }
+
+    input CategoriaRestauranteInput {
+        nombre: String!
+    }
+
+    input HorarioInput {
+        dia: String!
+        apertura: String!
+        cierre: String!
+    }
+
+    input RestauranteInput {
+        nombre: String!
+        direccion: String!
+        Ciudad: String!
+        Estado: String!
+        latitud: Float!
+        longitud: Float!
+        telefono: String!
+        horario: [HorarioInput!]
+        correoResponsable: String
+        categoria: ID
+        subCategorias: [CategoriaInput]
+        facebook: String
+        instagram: String
+    }
+
+    input CoordenadasInput {
+        latitud1: Float
+        longitud1: Float
+        latitud2: Float
+        longitud2: Float
+    }
+
     type Query {
         #Usuarios
         obtenerUsuarios: [Usuario]
@@ -189,6 +253,7 @@ const typeDefs = gql`
         obtenerGenerales: [General]
         #platillos
         obtenerPlatillos: [Platillo]
+        obtenerPlatillosDisponiblesCategoria(categoria: ID!): [Platillo]
         obtenerPlatillosDisponibles: [Platillo]
         obtenerPlatillo(id: ID!): Platillo
         #pedidos
@@ -198,8 +263,13 @@ const typeDefs = gql`
         
         #estadisticas
         obtenerIngresosyPedidos: [IngresosyPedidos]
+        #restaurantes
+        obtenerRestaurantes(input: CoordenadasInput): [Restaurante]
+        obtenerRestaurante(id: ID!): Restaurante
     }
     type Mutation {
+        #Restaurantes
+        crearNuevoRestaurante(input: RestauranteInput): Restaurante
         #Usuarios
         crearNuevoUsuario(input: UsuarioInput!): Usuario
         autenticarUsuario(input: AuthInput!): Token
