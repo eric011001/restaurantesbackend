@@ -484,7 +484,8 @@ const resolvers = {
                 }
                 try {
                     const platillo = new Platillo(input);
-                    platillo.save()
+                    await platillo.save();
+                    //console.log(await newPlatillo.populate('categoria'));
                     return platillo;
                 } catch (error) {
                     throw new Error(error);
