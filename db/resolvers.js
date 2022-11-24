@@ -58,6 +58,7 @@ const resolvers = {
 
                 return categoria;
             },
+            //fgh
             obtenerUsuarios: async (_,{},ctx) => {
                 if(ctx.rol !== "ADMINISTRADOR" && ctx.status === "INACTIVO"){
                     throw new Error('No cuentas con los permisos para esta acción');
